@@ -34,7 +34,6 @@ const registerUser = (req, res) => {
   const auth = getAuth();
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      const user = userCredential.user;
       res.status(200).send({
         msg: "Usuario creado exitosamente",
         data: userCredential,
@@ -46,11 +45,9 @@ const registerUser = (req, res) => {
         data: error.message,
       });
     });
-
-  // res.json({ message: "Create user" });
 };
 
-// @desc Login
+// @desc Login de un usuario
 // @route POST /api/login
 // @access Public
 const loginUser = (req, res) => {
@@ -61,41 +58,41 @@ const loginUser = (req, res) => {
     .then((userCredential) => {
       const user = userCredential.user;
       res.status(200).send({
-        msg: "Creado exitosamente",
-        data: userCredential,
+        msg: "Usuario inició sesión exitosamente",
+        data: {
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
+          token1: userCredential.user.stsTokenManager.refreshToken,
+          token2: userCredential.user.stsTokenManager.accessToken,
+        },
       });
     })
     .catch((error) => {
       res.status(500).send({
-        msg: "No se pudo crear el usuario",
+        msg: "Credenciales incorrectas",
         data: error.message,
       });
     });
-  // res.json({ message: "Login user" });
 };
 
-// @desc Crear un usuario
-// @route POST /api/users
+// @desc Logout de un usuario
+// @route POST /api/users/logout
 // @access Public
 const logoutUser = (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
   const auth = getAuth();
-  signOut(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
+  signOut(auth)
+    .then(() => {
+      // response de firebase
       res.status(200).send({
-        msg: "Creado exitosamente",
-        data: userCredential,
+        msg: "Usuario cerró sesión exitosamente",
       });
     })
     .catch((error) => {
       res.status(500).send({
-        msg: "No se pudo crear el usuario",
+        msg: "Error Log out",
         data: error.message,
       });
     });
-  // res.json({ message: "Logout user" });
 };
 
 module.exports = {
