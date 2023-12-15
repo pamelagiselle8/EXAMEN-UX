@@ -78,7 +78,6 @@ const logoutUser = (req, res) => {
   const auth = getAuth();
   signOut(auth)
     .then(() => {
-      // response de firebase
       res.status(200).send({
         msg: "Usuario cerró sesión exitosamente",
       });
