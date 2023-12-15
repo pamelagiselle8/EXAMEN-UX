@@ -1,7 +1,3 @@
-const asyncHandler = require("express-async-handler");
-
-const User = require("../models/userModel");
-
 // Import the functions you need from the SDKs you need
 const { initializeApp } = require("firebase/app");
 const {
