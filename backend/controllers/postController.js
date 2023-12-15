@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://pamelagiselle8:9qVsiVKp9FthiMnF@examenux.pt6lxir.mongodb.net/?retryWrites=true&w=majority";
 
@@ -39,7 +39,7 @@ const createPost = async (req, res) => {
   // Crear un json con el esquema definido en postModel
   const post = await new Post({
     titulo: req.body.titulo,
-    texto: req.body.text,
+    texto: req.body.texto,
   });
   // Insertar el nuevo post en la collection
   const result = await posts.insertOne(post);
@@ -52,7 +52,7 @@ const createPost = async (req, res) => {
   // Mensaje de éxito si logró crearse
   res.status(200).send({
     msg: "Post creado exitosamente",
-    data: result.insertedId,
+    data: result,
   });
 };
 
@@ -90,26 +90,21 @@ const editPost = async (req, res) => {
     });
   }
   // Validar si existe el post con el id recibido
-  // if (!posts.findOne({ _id: req.params.id })) {
-  //   return res.status(500).send({
-  //     msg: `No se encontró ningún post con id ${res.body.id}`,
-  //   });
-  // }
+  if (await !posts.findOne({ _id: new ObjectId(req.params.id) })) {
+    return res.status(500).send({
+      msg: `No se encontró ningún post con id ${res.body.id}`,
+    });
+  }
 
   // Filtro para buscar el post con el id recibido
-  const filter = { _id: req.params.id };
+  const filter = { _id: new ObjectId(req.params.id) };
   // Nuevo valor de titulo del post
-  const update = { $set: { titulo: req.body.titulo } };
+  const update = { $set: { titulo: req.body.titulo, texto: req.body.texto } };
   const options = { upsert: false };
 
   // Editar el post
   const result = await posts.updateOne(filter, update, options);
 
-  // Print the number of matching and modified documents
-  console.log(
-    `${result.matchedCount} posts matched the filter, updated ${result.modifiedCount} post(s)`
-  );
-  // res.status(200).send("Post editado existosamente");
   res
     .status(200)
     .send(
