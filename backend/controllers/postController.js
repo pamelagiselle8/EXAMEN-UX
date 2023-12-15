@@ -52,7 +52,7 @@ const createPost = async (req, res) => {
   // Mensaje de éxito si logró crearse
   res.status(200).send({
     msg: "Post creado exitosamente",
-    data: result,
+    data: result.insertedId,
   });
 };
 
@@ -105,17 +105,33 @@ const editPost = async (req, res) => {
   // Editar el post
   const result = await posts.updateOne(filter, update, options);
 
-  res
-    .status(200)
-    .send(
-      `${result.matchedCount} posts matched the filter, updated ${result.modifiedCount} post(s)`
-    );
+  res.status(200).send("El post fue editado exitosamente");
 };
 
 // @desc Borrar un post
 // @route DELETE /api/posts/id:
 // @access Private
-const deletePost = async (req, res) => {};
+const deletePost = async (req, res) => {
+  // Validar si no hay posts
+  if ((await posts.countDocuments()) === 0) {
+    res.status(200).send({
+      msg: "No hay posts guardados",
+    });
+  }
+  // Validar si existe el post con el id recibido
+  if (await !posts.findOne({ _id: new ObjectId(req.params.id) })) {
+    return res.status(500).send({
+      msg: `No se encontró ningún post con id ${res.body.id}`,
+    });
+  }
+
+  // Filtro para buscar el post con el id recibido
+  const filter = { _id: new ObjectId(req.params.id) };
+  // Eliminar el post
+  const result = await posts.deleteOne(filter);
+
+  res.status(200).send("El post fue eliminado exitosamente");
+};
 
 module.exports = {
   listPosts,
