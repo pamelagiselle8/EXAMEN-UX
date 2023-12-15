@@ -34,27 +34,44 @@ const Post = require("../models/postModel");
 // @desc Listar todos los posts
 // @route GET /api/posts
 // @access Private
-const listPosts = (req, res) => {
-  // const post = {
-  //   titulo: req.body.titulo,
-  //   texto: req.body.texto,
-  // };
+const listPosts = async (req, res) => {
+  // Buscar posts registrados en la collection
+  const query = posts.find();
+  // Validar si no hay posts
+  if ((await posts.countDocuments()) === 0) {
+    res.status(200).send({
+      msg: "No hay posts guardados",
+    });
+  }
+  // Si hay posts, guardar cada post en un arreglo
+  let arrPosts = [];
+  for await (const doc of query) {
+    arrPosts.push(doc);
+  }
+  // Listar los posts
+  res.status(200).send({
+    documentos: arrPosts,
+  });
 };
 
 // @desc Crear un post
 // @route POST /api/posts
 // @access Private
 const createPost = async (req, res) => {
+  // Crear un json con el esquema definido en postModel
   const post = await new Post({
     titulo: req.body.titulo,
     texto: req.body.text,
   });
+  // Insertar el nuevo post en la collection
   const result = await posts.insertOne(post);
+  // Mensaje de error si no se pudo crear
   if (!result.insertedId) {
     res.status(500).send({
       msg: "No se pudo crear el post",
     });
   }
+  // Mensaje de éxito si logró crearse
   res.status(200).send({
     msg: "Post creado exitosamente",
     data: result.insertedId,
